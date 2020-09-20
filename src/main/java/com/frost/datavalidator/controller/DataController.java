@@ -19,10 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.frost.datavalidator.exception.ValidationException;
 import com.frost.datavalidator.model.DataModel;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author jobin
  *
  */
+@Slf4j
 @RestController
 @RequestMapping("/data")
 public class DataController {

@@ -9,11 +9,14 @@ import java.time.temporal.ChronoUnit;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author jobin
  *
  */
-public class AgeValidator implements ConstraintValidator<Age, LocalDate> {
+@Slf4j
+public class AgeValidator implements ConstraintValidator<Age, String> {
 
 	protected long minAge;
 
@@ -23,14 +26,19 @@ public class AgeValidator implements ConstraintValidator<Age, LocalDate> {
 	}
 
 	@Override
-	public boolean isValid(LocalDate bday, ConstraintValidatorContext validatorCtx) {
+	public boolean isValid(String bday, ConstraintValidatorContext validatorCtx) {
 
-		if (bday == null) {
-			return true;
+		LocalDate bdate;
+
+		try {
+			bdate = LocalDate.parse(bday);
+		} catch (Exception e) {
+			log.error("Failed to parse the dob : {}", e);
+			return false;
 		}
 
 		LocalDate today = LocalDate.now();
-		return ChronoUnit.YEARS.between(bday, today) >= minAge;
+		return ChronoUnit.YEARS.between(bdate, today) >= minAge;
 
 	}
 }
