@@ -6,6 +6,7 @@ package com.frost.datavalidator.controller;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.frost.datavalidator.exception.ValidationException;
 import com.frost.datavalidator.model.DataModel;
+import com.frost.datavalidator.model.DocumentDetails;
+import com.frost.datavalidator.service.DocumentService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,11 +33,29 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/data")
 public class DataController {
 
+	@Autowired
+	private DocumentService documentService;
+
 	@PutMapping("/{userId}")
 	public @ResponseBody ResponseEntity<String> createData(
 			@RequestHeader(value = "fileType", required = true) String fileType,
 			@PathVariable(value = "userId", required = true) String userId, @Valid @RequestBody DataModel data)
 			throws ValidationException {
+
+		perfromBasicValidations(fileType, userId);
+
+		documentService.addDocument(userId, fileType, data);
+
+		return ResponseEntity.status(HttpStatus.CREATED).body("New Document created of type " + fileType);
+
+	}
+
+	/**
+	 * @param fileType
+	 * @param userId
+	 * @throws ValidationException
+	 */
+	private void perfromBasicValidations(String fileType, String userId) throws ValidationException {
 
 		if (StringUtils.isBlank(userId)) {
 			throw new ValidationException("UserId cannot be empty");
@@ -44,7 +65,11 @@ public class DataController {
 			throw new ValidationException("FileType Header cannot be empty");
 		}
 
-		return ResponseEntity.status(HttpStatus.CREATED).body("Data is valid.");
+		DocumentDetails existingDocument = documentService.checkIfDocumentExists(userId);
+		if (existingDocument.isExists()) {
+			throw new ValidationException(existingDocument.getName()
+					+ " Document already exists for this user. You can only update this existing document.");
+		}
 
 	}
 
