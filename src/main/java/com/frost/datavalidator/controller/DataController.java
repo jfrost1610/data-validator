@@ -42,7 +42,7 @@ public class DataController {
 			@PathVariable(value = "userId", required = true) String userId, @Valid @RequestBody DataModel data)
 			throws ValidationException {
 
-		perfromBasicValidations(fileType, userId);
+		performBasicValidations(fileType, userId);
 
 		documentService.addDocument(userId, fileType, data);
 
@@ -55,7 +55,7 @@ public class DataController {
 	 * @param userId
 	 * @throws ValidationException
 	 */
-	private void perfromBasicValidations(String fileType, String userId) throws ValidationException {
+	private void performBasicValidations(String fileType, String userId) throws ValidationException {
 
 		if (StringUtils.isBlank(userId)) {
 			throw new ValidationException("UserId cannot be empty");
